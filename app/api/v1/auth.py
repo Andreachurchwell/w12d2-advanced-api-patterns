@@ -1,15 +1,13 @@
 from fastapi import APIRouter, Depends, Header
 from pydantic import BaseModel, EmailStr, field_validator
+from sqlalchemy.orm import Session
 
 from app.core.security import hash_password, verify_password, create_access_token, decode_token
 from app.core.exceptions import UnauthorizedError
-
+from app.db.deps import get_db
+from app.db.models import User
 
 router = APIRouter()
-
-
-# Temporary in-memory user store (we'll replace with DB later)
-USERS: dict[str, str] = {}  # email -> hashed_password
 
 class RegisterRequest(BaseModel):
     email: EmailStr
@@ -31,30 +29,37 @@ class LoginRequest(BaseModel):
 
 
 @router.post("/register")
-def register(payload: RegisterRequest):
+def register(payload: RegisterRequest, db: Session = Depends(get_db)):
     email = payload.email.lower()
 
-    if email in USERS:
+    existing = db.query(User).filter(User.email == email).first()
+    if existing:
         return {"status": "error", "message": "User already exists"}
 
-    hashed = hash_password(payload.password)
-    USERS[email] = hashed
+    user = User(
+        email=email,
+        password_hash=hash_password(payload.password),
+        role="user",
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
 
-    return {"status": "ok", "email": email}
+    return {"status": "ok", "email": user.email}
 
 
 @router.post("/login")
-def login(payload: LoginRequest):
+def login(payload: LoginRequest, db: Session = Depends(get_db)):
     email = payload.email.lower()
 
-    hashed = USERS.get(email)
-    if not hashed:
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
         return {"status": "error", "message": "Invalid credentials"}
 
-    if not verify_password(payload.password, hashed):
+    if not verify_password(payload.password, user.password_hash):
         return {"status": "error", "message": "Invalid credentials"}
 
-    token = create_access_token(email)
+    token = create_access_token(user.email)
     return {"status": "ok", "access_token": token, "token_type": "bearer"}
 
 
@@ -68,6 +73,7 @@ def get_current_user(authorization: str = Header(None)) -> str:
         return payload["sub"]
     except Exception:
         raise UnauthorizedError("Invalid or expired token")
+
 
 @router.get("/me")
 def me(user: str = Depends(get_current_user)):

@@ -5,6 +5,10 @@ from app.api.v1.router import api_router
 from app.core.middleware import RequestIDMiddleware
 from app.core.exceptions import AppError, NotFoundError
 
+
+from app.db.init_db import init_db
+
+
 def create_app() -> FastAPI:
     app = FastAPI(title="Watchlist API", version="1.0.0")
 
@@ -47,6 +51,11 @@ def create_app() -> FastAPI:
         raise NotFoundError("Test error works")
 
     return app
+
+
+    @app.on_event("startup")
+    def on_startup():
+        init_db()
 
 app = create_app()
 
