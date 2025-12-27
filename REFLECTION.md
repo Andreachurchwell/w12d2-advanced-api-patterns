@@ -1,9 +1,8 @@
 # W12D2 Advanced API Patterns — Reflection & Current State
 
 ## What this project is
-This project is a production-style FastAPI backend for a “Watchlist” app (movies/shows I want to track).
-The goal is to practice enterprise API patterns: routing/versioning, auth + JWT, middleware, standardized errors,
-database persistence, protected CRUD, and later rate limiting + caching + async patterns.
+This project is a production-style FastAPI backend for a “Watchlist” app (movies/shows I want to watch later).
+The goal is to practice enterprise API patterns: auth, JWT, middleware, versioning, error handling, DB persistence, etc.
 
 The domain is intentionally simple so I can focus on architecture and correctness instead of business complexity.
 
@@ -18,144 +17,81 @@ The domain is intentionally simple so I can focus on architecture and correctnes
   - `/v1/watchlists` → watchlist resource routes
 - Central `api_router` includes all versioned routers.
 
----
-
 ### 2. Authentication (working end-to-end)
-Implemented in `app/api/v1/auth.py` + `app/core/security.py`:
-
+Implemented in `app/api/v1/auth.py`:
 - `POST /v1/auth/register`
-  - Registers a user
+  - Registers a user (now persisted in SQLite DB)
   - Validates email + password strength
   - Hashes password with bcrypt
-
 - `POST /v1/auth/login`
   - Verifies credentials
   - Returns a JWT access token
-
 - `GET /v1/auth/me`
   - Protected endpoint
   - Reads JWT from `Authorization: Bearer <token>`
   - Returns the authenticated user's email
+- JWT handling lives in `app/core/security.py` (create + decode)
 
-- JWT handling:
-  - Token creation + decoding in `app/core/security.py`
-  - Token subject = user email
-
-✅ **Update:** Users are now stored in the database (not in-memory), so credentials persist across restarts.
-
----
+✅ Important improvement: users are no longer in-memory, so restarting the server does NOT wipe them.
 
 ### 3. Middleware & Error Handling
 - Request ID middleware:
   - Every request gets an `X-Request-ID` header
-- Custom error system:
-  - `AppError` base class
-  - `UnauthorizedError`, `NotFoundError`, etc.
-  - Global exception handler formats errors consistently
-
----
+- Custom error system + global exception handler:
+  - Standardized error response format (code/message/request_id)
 
 ### 4. Database Persistence (SQLite)
-Database is now wired up and working:
+- SQLite database at `sqlite:///./app.db`
+- SQLAlchemy models:
+  - `User` (email, password_hash, role, created_at)
+  - `WatchlistItem` (user_id, title, media_type, created_at)
+- DB session wiring:
+  - `app/db/session.py` defines engine + SessionLocal + Base
+  - `app/db/deps.py` provides `get_db()` dependency
+- Tables are created successfully: `users`, `watchlist_items`
 
-- SQLAlchemy setup:
-  - `app/db/session.py` → engine + SessionLocal + Base
-  - `app/db/deps.py` → `get_db()` dependency
-  - `app/db/models.py` → SQLAlchemy models
-  - `app/db/init_db.py` → creates tables
-
-- SQLite file:
-  - `app.db`
-- Verified tables exist:
-  - `users`
-  - `watchlist_items`
-
----
-
-### 5. Watchlists (Protected CRUD — partially complete)
-Implemented in `app/api/v1/watchlists.py`.
-
-✅ Working endpoints:
-
+### 5. Watchlists (CRUD working + protected)
+Implemented in `app/api/v1/watchlists.py` (all routes require JWT):
 - `GET /v1/watchlists/`
-  - Protected via JWT
-  - Returns `{ user, watchlist: [...] }`
-  - Pulls from the DB (not memory)
-
+  - Returns the authenticated user + their items
 - `POST /v1/watchlists/items`
-  - Protected via JWT
-  - Adds a watchlist item for the logged-in user
-  - Stores in DB
-
-- `DELETE /v1/watchlists/items/{id}`
-  - Protected via JWT
-  - Deletes the specified item (and confirms with a response)
-
-✅ Verified with curl:
-- Register → Login → Token → Add items → List → Delete → List again works.
-
----
-
-### 6. Streamlit Dashboard (UI helper for testing)
-A Streamlit dashboard was created to test the API without Swagger.
-Work was stashed (WIP) so backend work could continue cleanly.
-
-- Stashes created:
-  - `stash@{0}: WIP Streamlit app file`
-  - `stash@{1}: WIP Streamlit dashboard UI`
-
-This can be restored later with:
-- `git stash pop` (or `git stash apply`)
+  - Adds a watchlist item (title + type)
+  - Saves to DB
+- `DELETE /v1/watchlists/items/{item_id}`
+  - Deletes an item by id (owned by the logged-in user)
+- `PATCH /v1/watchlists/items/{item_id}`
+  - Partially updates an item (title and/or type)
 
 ---
 
 ## Verified working flows
+- Register → Login → Access protected routes works
 - `/health` works
-- Register → Login → Access protected route works
 - `/v1/auth/me` works with JWT
-- `/v1/watchlists/` requires auth and returns user context
-- Database tables are created and persist across restart
-- Watchlist items can be created + deleted + listed
+- Watchlist flows work end-to-end:
+  - Add items (POST)
+  - List items (GET)
+  - Delete item (DELETE)
+  - Update item (PATCH)
 
 ---
 
 ## Current Git state
-- Watchlists work branch existed earlier: `feature/watchlists`
-- Database persistence work is now on: `feature/db-persistence`
-- DB persistence branch has been committed and pushed:
-  - commit message: “Add database persistence for users and watchlists”
+- Active branch: `feature/db-persistence`
+- DB persistence code has been committed + pushed
+- Working tree currently has local edits (REFLECTION.md, watchlists.py, .gitignore)
 
 ---
 
-## Where I stopped (latest stopping point)
-I stopped after successfully:
-- Moving users from in-memory to SQLite persistence
-- Creating SQLAlchemy models (`User`, `WatchlistItem`)
-- Creating tables and confirming they exist
-- Wiring watchlist CRUD (GET + POST + DELETE) to the database
-- Testing the full workflow with curl + JWT
-
----
-
-## What is NOT done yet (still needed for full assignment)
-### CRUD completeness
-- PATCH or PUT endpoint for updating a watchlist item (not done yet)
-
-### Production Patterns / Requirements still missing
-- Pagination + filtering + sorting on list endpoints
-- Rate limiting with Redis (headers + 429 behavior)
-- Caching strategy
-- At least one async endpoint using httpx
-- BackgroundTasks example
-- Tests (pytest + coverage target)
-- Dockerfile + docker-compose (API + Redis + DB)
-- Deployment + Postman collection + demo video
+## Where I stopped today
+I stopped after:
+- Switching from in-memory storage to SQLite persistence
+- Implementing full watchlist CRUD routes (GET/POST/DELETE) + PATCH update
+- Testing endpoints using curl with exported `$TOKEN`
 
 ---
 
 ## Notes for future me
-- If login says "Invalid credentials", make sure the user was registered in the DB.
-- Always include: `Authorization: Bearer <token>` for protected endpoints.
-- Easiest workflow for tokens in terminal:
-  - export TOKEN="..." once and reuse it in curl commands.
-- If Streamlit work disappears: it’s in git stash (WIP).
+- Tokens expire. If you get `Invalid or expired token`, re-login and re-export TOKEN.
+- If login ever says invalid credentials, confirm the user exists in DB (register once).
+- Keep DB session usage consistent: use `db: Session = Depends(get_db)` in every route (avoid `next(get_db())`).

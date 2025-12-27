@@ -108,23 +108,23 @@ def remove_item(
 def update_item(
     item_id: int,
     payload: WatchlistItemUpdate,
-    user: str = Depends(get_current_user),
+    user_email: str = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
-    db = next(get_db())
+    user = db.query(User).filter(User.email == user_email).first()
+    if not user:
+        raise NotFoundError("User not found")
 
     item = (
         db.query(WatchlistItem)
-        .join(User)
-        .filter(User.email == user, WatchlistItem.id == item_id)
+        .filter(WatchlistItem.id == item_id, WatchlistItem.user_id == user.id)
         .first()
     )
-
     if not item:
         raise NotFoundError("Item not found")
 
     if payload.title is not None:
         item.title = payload.title
-
     if payload.type is not None:
         item.media_type = payload.type
 
@@ -137,6 +137,6 @@ def update_item(
             "id": item.id,
             "title": item.title,
             "type": item.media_type,
-            "created_at": item.created_at,
+            "created_at": item.created_at.isoformat(),
         },
     }
