@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.api.v1.auth import get_current_user
 from app.db.deps import get_db
 from app.db.models import User, WatchlistItem
+from app.core.exceptions import NotFoundError
 
 from fastapi import HTTPException
 
@@ -14,6 +15,9 @@ class WatchlistItemCreate(BaseModel):
     title: str
     type: str  # "movie" or "show"
 
+class WatchlistItemUpdate(BaseModel):
+    title: str | None = None
+    type: str | None = None
 
 @router.get("/")
 def list_watchlist(
@@ -98,3 +102,41 @@ def remove_item(
     db.commit()
 
     return {"status": "ok", "deleted_id": item_id}
+
+
+@router.patch("/items/{item_id}")
+def update_item(
+    item_id: int,
+    payload: WatchlistItemUpdate,
+    user: str = Depends(get_current_user),
+):
+    db = next(get_db())
+
+    item = (
+        db.query(WatchlistItem)
+        .join(User)
+        .filter(User.email == user, WatchlistItem.id == item_id)
+        .first()
+    )
+
+    if not item:
+        raise NotFoundError("Item not found")
+
+    if payload.title is not None:
+        item.title = payload.title
+
+    if payload.type is not None:
+        item.media_type = payload.type
+
+    db.commit()
+    db.refresh(item)
+
+    return {
+        "status": "ok",
+        "item": {
+            "id": item.id,
+            "title": item.title,
+            "type": item.media_type,
+            "created_at": item.created_at,
+        },
+    }
