@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+httpx
+redis
+python-dotenv
+pydantic
+passlib[bcrypt]
+PyJWT
+
+pytest
+pytest-asyncio
+pytest-cov
