@@ -7,7 +7,7 @@ from app.db.deps import get_db
 from app.db.models import User, WatchlistItem
 from app.core.exceptions import NotFoundError
 import json
-from app.core.redis_client import redis_client
+from app.core.redis_client import redis_client, delete_pattern
 from fastapi import HTTPException
 from app.core.app_logger import logger
 
@@ -51,7 +51,7 @@ async def list_watchlist(
         raise HTTPException(status_code=400, detail="sort must be 'created_at_desc' or 'created_at_asc'")
 
     # ✅ IMPORTANT: cache key must include params
-    cache_key = f"cache:watchlist:{user_email}:skip={skip}:limit={limit}:type={media_type}:sort={sort}"
+    cache_key = f"cache:watchlist:{user_email}:skip={skip}:limit={limit}:type={media_type or 'all'}:sort={sort}"
 
     # ---- Redis cache check ----
     cached = await redis_client.get(cache_key)
@@ -112,7 +112,10 @@ async def add_item(
     )
     db.add(item)
     db.commit()
-    await redis_client.delete(f"cache:watchlist:{user_email}")
+    # await redis_client.delete(f"cache:watchlist:{user_email}")
+    # clear ALL cached pages for this user (skip/limit/type/sort variations)
+    await delete_pattern(f"cache:watchlist:{user_email}:*")
+
     db.refresh(item)
     logger.info(
         "watchlist_item_added",
@@ -156,8 +159,8 @@ async def remove_item(
 
     db.delete(item)
     db.commit()
-    await redis_client.delete(f"cache:watchlist:{user_email}")
-
+    # await redis_client.delete(f"cache:watchlist:{user_email}")
+    await redis_client.delete_pattern(f"cache:watchlist:{user_email}:*")
     return {"status": "ok", "deleted_id": item_id}
 
 
@@ -186,8 +189,8 @@ async def update_item(
         item.media_type = payload.type
 
     db.commit()
-    await redis_client.delete(f"cache:watchlist:{user_email}")
-
+    # await redis_client.delete(f"cache:watchlist:{user_email}")
+    await redis_client.delete_pattern(f"cache:watchlist:{user_email}:*")
     db.refresh(item)
 
     return {

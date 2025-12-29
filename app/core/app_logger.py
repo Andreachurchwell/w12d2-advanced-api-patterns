@@ -1,25 +1,31 @@
 import logging
 import sys
 
-LOG_FORMAT = (
-    "%(asctime)s %(levelname)s %(name)s %(message)s request_id=%(request_id)s"
-)
+logger = logging.getLogger("app")
 
-class SafeFormatter(logging.Formatter):
-    def format(self, record: logging.LogRecord) -> str:
+
+class RequestIdFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        # Make sure every log record has request_id so the formatter never crashes
         if not hasattr(record, "request_id"):
             record.request_id = "-"
-        return super().format(record)
+        return True
 
-def setup_logging():
+
+def setup_logging() -> None:
+    logger.setLevel(logging.INFO)
+
     handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(SafeFormatter(LOG_FORMAT))
+    handler.addFilter(RequestIdFilter())
 
-    root = logging.getLogger()
-    root.setLevel(logging.INFO)
+    formatter = logging.Formatter(
+        fmt="%(asctime)s %(levelname)s request_id=%(request_id)s %(name)s %(message)s"
+    )
+    handler.setFormatter(formatter)
 
-    # clear any existing handlers (uvicorn reload can stack handlers)
-    root.handlers.clear()
-    root.addHandler(handler)
+    # Avoid duplicate handlers during reload
+    logger.handlers.clear()
+    logger.addHandler(handler)
 
-logger = logging.getLogger("watchlist-api")
+    # Optional: stop logs from being printed twice
+    logger.propagate = False

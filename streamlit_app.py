@@ -13,9 +13,9 @@ st.set_page_config(
 DASH_CSS = """
 <style>
 /* Hide Streamlit chrome */
-#MainMenu {visibility: hidden;}
+
 footer {visibility: hidden;}
-header {visibility: hidden;}
+
 
 /* Page width + spacing */
 .block-container { padding-top: 1.25rem; padding-bottom: 2.25rem; max-width: 1400px; }
@@ -153,6 +153,13 @@ def api_get(api_base: str, path: str, token: str | None = None):
         headers["Authorization"] = f"Bearer {token}"
     return requests.get(f"{api_base}{path}", headers=headers, timeout=12)
 
+def api_patch(api_base: str, path: str, json: dict, token: str | None = None):
+    headers = {"Content-Type": "application/json"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return requests.patch(f"{api_base}{path}", json=json, headers=headers, timeout=12)
+
+
 def nice_json(resp: requests.Response):
     st.caption(f"HTTP {resp.status_code}")
     try:
@@ -166,6 +173,17 @@ def check_api_up(api_base: str) -> str:
         return "UP" if r.status_code == 200 else "DOWN"
     except Exception:
         return "DOWN"
+    
+def api_delete(api_base: str, path: str, token: str | None = None):
+    headers = {}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return requests.delete(f"{api_base}{path}", headers=headers, timeout=12)
+
+def refresh_watchlist():
+    """Pull latest watchlist and display it."""
+    resp2 = api_get(st.session_state.api_base, "/watchlists/", st.session_state.token)
+    nice_json(resp2)
 
 # ---------- Session State ----------
 if "api_base" not in st.session_state:
@@ -197,7 +215,8 @@ with st.sidebar:
         st.info("Not logged in")
 
     st.divider()
-    st.caption("Tip: If login fails after restart, re-register (in-memory users reset).")
+    st.caption("Tip: If login fails, double-check email/password or re-register.")
+
 
 # ---------- Header ----------
 st.markdown("# 🎬 Watchlist Dashboard")
@@ -222,7 +241,7 @@ with col_auth:
         tabs = st.tabs(["Register", "Login", "Me"])
 
         with tabs[0]:
-            st.caption("Create a user (in-memory for now).")
+            st.caption("Create a user (stored in DB).")
             reg_email = st.text_input("Email", key="reg_email", placeholder="test@example.com")
             reg_pw = st.text_input("Password", type="password", key="reg_pw", placeholder="At least 8 chars")
 
@@ -266,4 +285,67 @@ with col_data:
                 resp = api_get(st.session_state.api_base, "/watchlists/", st.session_state.token)
                 nice_json(resp)
 
-        st.info("Next: Add + Remove watchlist items (we’ll build the endpoints next).")
+        st.divider()
+        st.subheader("➕ Add item")
+
+        new_title = st.text_input("Title", key="new_title", placeholder="The Matrix")
+        new_type = st.selectbox("Type", ["movie", "show"], key="new_type")
+
+        if st.button("Add to watchlist", use_container_width=True, key="btn_add"):
+            if not st.session_state.token:
+                st.warning("Login first.")
+            else:
+                resp = api_post(
+                    st.session_state.api_base,
+                    "/watchlists/items",
+                    {"title": new_title, "type": new_type},
+                    st.session_state.token,
+                )
+                nice_json(resp)
+                refresh_watchlist()
+
+        st.divider()
+        st.subheader("🗑️ Remove item")
+
+        del_id = st.number_input("Item ID to delete", min_value=1, step=1, key="del_id")
+
+        if st.button("Delete item", use_container_width=True, key="btn_delete"):
+            if not st.session_state.token:
+                st.warning("Login first.")
+            else:
+                resp = api_delete(
+                    st.session_state.api_base,
+                    f"/watchlists/items/{int(del_id)}",
+                    st.session_state.token,
+                )
+                nice_json(resp)
+                refresh_watchlist()
+
+        st.divider()
+        st.subheader("✏️ Update item")
+
+        upd_id = st.number_input("Item ID to update", min_value=1, step=1, key="upd_id")
+        upd_title = st.text_input("New title (optional)", key="upd_title", placeholder="Leave blank to keep same")
+        upd_type = st.selectbox("New type (optional)", ["(no change)", "movie", "show"], key="upd_type")
+
+        if st.button("Update item", use_container_width=True, key="btn_update"):
+            if not st.session_state.token:
+                st.warning("Login first.")
+            else:
+                payload = {}
+                if upd_title.strip():
+                    payload["title"] = upd_title.strip()
+                if upd_type != "(no change)":
+                    payload["type"] = upd_type
+
+                if not payload:
+                    st.warning("Enter a title and/or choose a type to update.")
+                else:
+                    resp = api_patch(
+                        st.session_state.api_base,
+                        f"/watchlists/items/{int(upd_id)}",
+                        payload,
+                        st.session_state.token,
+                    )
+                    nice_json(resp)
+                    refresh_watchlist()
