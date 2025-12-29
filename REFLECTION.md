@@ -142,11 +142,8 @@ Verified working flows:
 ### Current Git state
 
 - Active branch: feature/db-persistence
-
 - DB persistence, caching, and CRUD routes are implemented
-
 - Streamlit UI exists locally and is ready to be committed
-
 - Reflection and cleanup changes pending commit
 
 Where I stopped today
