@@ -14,6 +14,6 @@ class Settings(BaseSettings):
     JWT_ALG: str = "HS256"
 
     JWT_EXPIRE_MINUTES: int = Field(default=60, validation_alias="jwt_expire_minutes")
-
+    REDIS_URL: str = "redis://localhost:6379/0"
 
 settings = Settings()
