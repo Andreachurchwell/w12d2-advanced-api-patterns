@@ -11,3 +11,8 @@ pytest
 pytest-asyncio
 pytest-cov
 pydantic-settings
+
+streamlit
+requests
+
+SQLAlchemy>=2.0
