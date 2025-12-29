@@ -1,15 +1,20 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-
 from app.api.v1.router import api_router
 from app.core.middleware import RequestIDMiddleware
-from app.core.exceptions import AppError, NotFoundError
+from app.core.exceptions import AppError
 from app.db.init_db import init_db
 from sqlalchemy import text
 from app.db.session import SessionLocal
 from fastapi import Response
+from app.core.redis_client import redis_client
+from app.core.app_logger import setup_logging, logger
+
+
 
 def create_app() -> FastAPI:
+    setup_logging()
+    logger.info("app_starting")
     app = FastAPI(title="Watchlist API", version="1.0.0")
 
     app.add_middleware(RequestIDMiddleware)
@@ -17,6 +22,7 @@ def create_app() -> FastAPI:
     @app.on_event("startup")
     def on_startup():
         init_db()
+
 
     @app.exception_handler(AppError)
     async def app_error_handler(request: Request, exc: AppError):
@@ -32,14 +38,17 @@ def create_app() -> FastAPI:
             },
         )
 
+
     app.include_router(api_router, prefix="/v1")
+
 
     @app.get("/health")
     def health():
         return {"status": "ok"}
 
+
     @app.get("/health/detailed")
-    def health_detailed(request: Request):
+    async def health_detailed(request: Request):
         request_id = getattr(request.state, "request_id", None)
 
         # ---- DB check ----
@@ -55,10 +64,17 @@ def create_app() -> FastAPI:
             except Exception:
                 pass
 
-        # ---- Redis check (placeholder until Redis is wired) ----
-        redis_status = "not_configured"
+       
+        # ---- Redis check ----
+        try:
+            redis_ok = await redis_client.ping()
+        except Exception:
+            redis_ok = False
 
-        overall = "ok" if db_status == "ok" and redis_status in ("ok", "not_configured") else "degraded"
+        redis_status = "ok" if redis_ok else "error"
+
+        overall = "ok" if db_status == "ok" and redis_status == "ok" else "degraded"
+
 
         return {
             "status": overall,
@@ -69,10 +85,6 @@ def create_app() -> FastAPI:
             },
         }
 
-
-    @app.get("/test-error")
-    def test_error():
-        raise NotFoundError("Test error works")
 
 
     @app.middleware("http")
@@ -86,8 +98,6 @@ def create_app() -> FastAPI:
 
 
     return app
-
-
 
 
 app = create_app()
