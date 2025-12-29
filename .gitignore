@@ -9,3 +9,4 @@ htmlcov/
 app.db
 *.sqlite
 *.sqlite3
+audit.log
