@@ -1,14 +1,19 @@
-from pydantic import BaseModel
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
 
 
-class Settings(BaseModel):
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./app.db")
-    JWT_SECRET: str = os.getenv("JWT_SECRET", "dev-secret")  # whatever you already use
-    JWT_ALG: str = os.getenv("JWT_ALG", "HS256")
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",  # ignore any env vars you aren't using yet
+    )
+
+    DATABASE_URL: str = "sqlite:///./app.db"
+    JWT_SECRET: str = "dev-secret"
+    JWT_ALG: str = "HS256"
+
+    JWT_EXPIRE_MINUTES: int = Field(default=60, validation_alias="jwt_expire_minutes")
 
 
 settings = Settings()

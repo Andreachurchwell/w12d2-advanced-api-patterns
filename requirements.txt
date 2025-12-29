@@ -10,3 +10,4 @@ PyJWT
 pytest
 pytest-asyncio
 pytest-cov
+pydantic-settings
