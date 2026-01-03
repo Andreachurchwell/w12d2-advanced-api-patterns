@@ -93,6 +93,11 @@ Run
 ```
 docker compose up --build
 ```
+To Stop Containers
+```
+docker compose down
+```
+
 Services
 - API: http://localhost:8000
 - Swagger: http://localhost:8000/docs
@@ -162,6 +167,20 @@ The FastAPI API can be deployed to Render as a Docker web service.
 - Health: `https://w12d2-advanced-api-patterns.onrender.com/health`
 
 > Note: If `/docs` or `/openapi.json` returns `Not Found`, the app may be mounted differently (ex: `/v1/docs`). In that case, verify the correct docs path via the running service routes.
+
+### Render Deployment
+
+These screenshots show the live deployed API running on Render.
+
+#### Render — Swagger Docs
+![Render Docs](assets/renderdoc.png)
+
+#### Render — Health Check
+![Render Health](assets/renderhealth.png)
+
+#### Render — OpenAPI JSON
+![Render OpenAPI](assets/renderjson.png)
+
 
 ### Environment Variables (Render)
 Set these in the Render dashboard:
