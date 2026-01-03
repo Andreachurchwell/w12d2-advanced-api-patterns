@@ -52,6 +52,7 @@ tests/
 ```
 
 ### API Endpoints
+```
 AUTH
 | Method | Endpoint                         | Description                       |
 | ------ | ------------------- -------------| --------------------------------- |
@@ -83,7 +84,7 @@ ASYNC EXTERNAL
 | GET    | `/health`                        | Basic health check                |
 | GET    | `/v1/health/detailed`            | DB + Redis health                 |
 
-
+```
 ### Local Development
 Requirements
 - Docker
