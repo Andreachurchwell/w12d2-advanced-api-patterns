@@ -149,3 +149,27 @@ These screenshots show the working endpoints and the optional Streamlit demo UI.
 This project was built for the W12D2 Advanced API Patterns assignment to practice production-style backend architecture and operational concerns rather than business complexity.
 
 The Watchlist domain was intentionally kept simple so the focus could stay on correctness, system behavior, and infrastructure patterns.
+
+### Deployment to Render
+![Render](assets/render.png)
+
+## Deployment (Render)
+
+The FastAPI API can be deployed to Render as a Docker web service.
+
+### Live API (Render)
+- Base URL: `https://w12d2-advanced-api-patterns.onrender.com`
+- Health: `https://w12d2-advanced-api-patterns.onrender.com/health`
+
+> Note: If `/docs` or `/openapi.json` returns `Not Found`, the app may be mounted differently (ex: `/v1/docs`). In that case, verify the correct docs path via the running service routes.
+
+### Environment Variables (Render)
+Set these in the Render dashboard:
+- `JWT_SECRET` = (a strong secret value)
+- `REDIS_URL` = Render Redis connection string (if using a managed Redis)
+- `DATABASE_URL` = (if using Postgres later; otherwise SQLite is local only)
+
+### Important Deployment Notes
+- SQLite works locally, but it is not ideal for production deployments because the filesystem may not persist across deploys.
+- Redis features (rate limiting + caching) require a Redis instance available in production.
+- Streamlit is included for local Docker Compose demos. If needed, it can be deployed as a separate Render service and pointed at the API using `API_BASE_URL`.
