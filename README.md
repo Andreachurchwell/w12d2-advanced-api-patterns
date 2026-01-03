@@ -50,11 +50,11 @@ tests/
 
 ### API Endpoints
 AUTH
-| Method | Endpoint            | Description           |
-| ------ | ------------------- | --------------------- |
-| POST   | `/v1/auth/register` | Register a new user   |
-| POST   | `/v1/auth/login`    | Login and receive JWT |
-| GET    | `/v1/auth/me`       | Get current user      |
+| Method | Endpoint                         | Description                       |
+| ------ | ------------------- -------------| --------------------------------- |
+| POST   | `/v1/auth/register`              | Register a new user               |
+| POST   | `/v1/auth/login`                 | Login and receive JWT             |
+| GET    | `/v1/auth/me`                    | Get current user                  |
 WATCHLIST(PROTECTED)
 | Method | Endpoint                         | Description                       |
 | ------ | -------------------------------- | --------------------------------- |
@@ -70,15 +70,15 @@ ADMIN
 | PATCH  | `/v1/watchlists/items/{item_id}` | Update item                       |
 | DELETE | `/v1/watchlists/items/{item_id}` | Delete item                       |
 HEALTH
-| Method | Endpoint              | Description        |
-| ------ | --------------------- | ------------------ |
-| GET    | `/health`             | Basic health check |
-| GET    | `/v1/health/detailed` | DB + Redis health  |
+| Method | Endpoint                         | Description                       |
+| ------ | ---------------------------------| --------------------------------- |
+| GET    | `/health`                        | Basic health check                |
+| GET    | `/v1/health/detailed`            | DB + Redis health                 |
 ASYNC EXTERNAL
-| Method | Endpoint              | Description        |
-| ------ | --------------------- | ------------------ |
-| GET    | `/health`             | Basic health check |
-| GET    | `/v1/health/detailed` | DB + Redis health  |
+| Method | Endpoint                         | Description                       |
+| ------ | -------------------------------- |-----------------------------------|
+| GET    | `/health`                        | Basic health check                |
+| GET    | `/v1/health/detailed`            | DB + Redis health                 |
 
 
 ### Local Development
