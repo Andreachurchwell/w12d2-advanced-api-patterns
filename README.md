@@ -127,7 +127,7 @@ These screenshots show the working endpoints and the optional Streamlit demo UI.
 ![Watchlist](assets/watchlist.png)
 
 ### Caching
-![Caching](assets/cacheddemo.png)
+![Caching](assets/cachedemo.png)
 
 ### External Async Demo
 ![External](assets/external.png)
