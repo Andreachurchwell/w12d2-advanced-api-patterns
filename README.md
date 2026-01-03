@@ -1,34 +1,116 @@
-# W12D2 After-Class Assignment: Advanced API Patterns
+## Watchlist API — W12D2 Advanced API Patterns
 
-## Production-Ready Watchlist API
+This project is a production-style FastAPI backend for a simple Watchlist application (movies and shows I want to save for later).
 
-This project implements a production-ready REST API using FastAPI that demonstrates advanced API patterns covered in W12D2.
+The purpose of this project is not the domain itself, but to practice and demonstrate real backend and infrastructure patterns including authentication, authorization, rate limiting, caching, background processing, health checks, testing, and containerized local development.
 
-The API allows users to:
-- Register and authenticate using JWT tokens
-- Search for movies and TV shows from an external API
-- Create and manage private watchlists
-- Add and remove titles from their watchlists
+### Features
+- REST API versioned under /v1
+- JWT authentication (register, login, /me)
+- Role-based access control (user vs admin)
+- Protected Watchlist CRUD endpoints
+- Redis-based rate limiting (429 responses + headers)
+- Redis-based response caching with invalidation on writes
+- Background task audit logging
+- Request ID middleware and standardized error responses
+- Health check endpoints
+- Async external API integration example (GitHub)
+- Pytest unit and integration tests (~85% coverage)
+- Docker Compose for local development
+- Optional Streamlit frontend for demo and exploration
 
-The system includes:
-- Role-based access control (user, admin)
-- Rate limiting using Redis
-- Async external API calls with httpx
-- Background task processing
-- Response caching
-- Structured logging and request ID tracking
-- Health check endpoints for deployment monitoring
-- API versioning (/v1)
-- Comprehensive testing and containerized deployment
+## Project Structure
 
-## Tech Stack
-- FastAPI
-- Uvicorn
-- Redis
-- PyJWT + passlib[bcrypt]
-- httpx
-- pytest + pytest-cov
-- Docker & docker-compose
+app/
+├── api/v1/
+│   ├── auth.py
+│   ├── watchlists.py
+│   ├── admin.py
+│   ├── external.py
+│   ├── health.py
+│   └── router.py
+├── core/
+│   ├── security.py
+│   ├── rate_limit.py
+│   ├── redis_client.py
+│   ├── middleware.py
+│   ├── exceptions.py
+│   └── audit.py
+├── db/
+│   ├── models.py
+│   ├── session.py
+│   └── deps.py
+└── main.py
 
-## Assignment
-W12D2 After-Class Assignment: Advanced API Patterns
+tests/
+├── conftest.py
+├── test_auth.py
+├── test_watchlists.py
+└── test_health.py
+
+### API Endpoints
+AUTH
+| Method | Endpoint            | Description           |
+| ------ | ------------------- | --------------------- |
+| POST   | `/v1/auth/register` | Register a new user   |
+| POST   | `/v1/auth/login`    | Login and receive JWT |
+| GET    | `/v1/auth/me`       | Get current user      |
+WATCHLIST(PROTECTED)
+| Method | Endpoint                         | Description                       |
+| ------ | -------------------------------- | --------------------------------- |
+| GET    | `/v1/watchlists`                 | List items (skip/limit/type/sort) |
+| POST   | `/v1/watchlists/items`           | Add item                          |
+| PATCH  | `/v1/watchlists/items/{item_id}` | Update item                       |
+| DELETE | `/v1/watchlists/items/{item_id}` | Delete item                       |
+ADMIN
+| Method | Endpoint                         | Description                       |
+| ------ | -------------------------------- | --------------------------------- |
+| GET    | `/v1/watchlists`                 | List items (skip/limit/type/sort) |
+| POST   | `/v1/watchlists/items`           | Add item                          |
+| PATCH  | `/v1/watchlists/items/{item_id}` | Update item                       |
+| DELETE | `/v1/watchlists/items/{item_id}` | Delete item                       |
+HEALTH
+| Method | Endpoint              | Description        |
+| ------ | --------------------- | ------------------ |
+| GET    | `/health`             | Basic health check |
+| GET    | `/v1/health/detailed` | DB + Redis health  |
+ASYNC EXTERNAL
+| Method | Endpoint              | Description        |
+| ------ | --------------------- | ------------------ |
+| GET    | `/health`             | Basic health check |
+| GET    | `/v1/health/detailed` | DB + Redis health  |
+
+
+### Local Development
+Requirements
+- Docker
+- Docker Compose
+Run
+```
+docker compose up --build
+```
+Services
+- API: http://localhost:8000
+- Swagger: http://localhost:8000/docs
+- Streamlit: http://localhost:8501
+
+Testing
+```
+pytest
+pytest --cov=app --cov-report=term-missing
+```
+
+Postman
+A Postman collection is included with example requests for:
+- Auth flow
+- Watchlist CRUD
+- RBAC enforcement
+- Rate limiting behavior (429)
+- Validation errors (422)
+- Health checks
+
+### Purpose
+
+This project was built for the W12D2 Advanced API Patterns assignment to practice production-style backend architecture and operational concerns rather than business complexity.
+
+The Watchlist domain was intentionally kept simple so the focus could stay on correctness, system behavior, and infrastructure patterns.
