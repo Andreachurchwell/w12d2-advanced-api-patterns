@@ -1,4 +1,29 @@
-## Watchlist API — W12D2 Advanced API Patterns
+<div align="center">
+
+# 🎬 Watchlist API — W12D2 Advanced API Patterns
+
+Production-style **FastAPI** backend showcasing **JWT Auth**, **RBAC**, **Redis rate limiting + caching**, **health checks**, **tests**, **Docker Compose**, and an optional **Streamlit dashboard**.
+
+<!-- Badges -->
+![Python](https://img.shields.io/badge/Python-3.12-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.1xx-009688?logo=fastapi&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-Rate%20Limit%20%2B%20Cache-DC382D?logo=redis&logoColor=white)
+![pytest](https://img.shields.io/badge/pytest-tests-0A9EDC?logo=pytest&logoColor=white)
+
+<!-- Deploy badge: just a nice label (Render doesn't have a universal deploy badge like Vercel) -->
+![Render](https://img.shields.io/badge/Deploy-Render-46E3B7?logo=render&logoColor=white)
+
+<!-- Quick links -->
+<p>
+  <a href="https://w12d2-advanced-api-patterns.onrender.com">Live API</a>
+  ·
+  <a href="https://w12d2-advanced-api-patterns.onrender.com/docs">Docs</a>
+  ·
+  <a href="https://w12d2-advanced-api-patterns.onrender.com/health">Health</a>
+</p>
+
+</div>
 
 This project is a production-style FastAPI backend for a simple Watchlist application (movies and shows I want to save for later).
 
