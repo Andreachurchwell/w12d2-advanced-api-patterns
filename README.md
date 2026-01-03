@@ -21,14 +21,16 @@ The purpose of this project is not the domain itself, but to practice and demons
 
 ## Project Structure
 
+```text
 app/
-├── api/v1/
-│   ├── auth.py
-│   ├── watchlists.py
-│   ├── admin.py
-│   ├── external.py
-│   ├── health.py
-│   └── router.py
+├── api/
+│   └── v1/
+│       ├── auth.py
+│       ├── watchlists.py
+│       ├── admin.py
+│       ├── external.py
+│       ├── health.py
+│       └── router.py
 ├── core/
 │   ├── security.py
 │   ├── rate_limit.py
@@ -47,6 +49,7 @@ tests/
 ├── test_auth.py
 ├── test_watchlists.py
 └── test_health.py
+```
 
 ### API Endpoints
 AUTH
