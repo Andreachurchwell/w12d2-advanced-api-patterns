@@ -146,6 +146,8 @@ A Postman collection is included with example requests for:
 ## Screenshots (API + Streamlit)
 
 These screenshots show the working endpoints and the optional Streamlit demo UI.
+### Streamlit Frontend
+![Streamlit](assets/streamlit.png)
 
 ### Auth
 ![Auth](assets/auth.png)
@@ -164,9 +166,6 @@ These screenshots show the working endpoints and the optional Streamlit demo UI.
 
 ### Health Checks
 ![Health Check](assets/healthcheck.png)
-
-### Streamlit Frontend
-![Streamlit](assets/streamlit.png)
 
 ### Postman
 ![Postman](assets/postman.png)
