@@ -113,6 +113,37 @@ A Postman collection is included with example requests for:
 - Validation errors (422)
 - Health checks
 
+## Screenshots (API + Streamlit)
+
+These screenshots show the working endpoints and the optional Streamlit demo UI.
+
+### Auth
+![Auth](assets/auth.png)
+
+### Login + Rate Limiting
+![Login](assets/login.png)
+![Logout](assets/logout.png)
+### Watchlist CRUD
+![Watchlist](assets/watchlist.png)
+
+### Caching
+![Caching](assets/cacheddemo.png)
+
+### External Async Demo
+![External](assets/external.png)
+
+### Health Checks
+![Health Check](assets/healthcheck.png)
+
+### Streamlit Frontend
+![Streamlit](assets/streamlit.png)
+
+### Postman
+![Postman](assets/postman.png)
+
+### Swagger
+![Swagger](assets/swagger.png)
+
 ### Purpose
 
 This project was built for the W12D2 Advanced API Patterns assignment to practice production-style backend architecture and operational concerns rather than business complexity.
