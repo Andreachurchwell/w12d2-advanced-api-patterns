@@ -7,7 +7,7 @@ RUN pip install --no-cache-dir -r requirements-streamlit.txt
 
 COPY streamlit_app.py .
 
-# ✅ add this line
+
 COPY .streamlit .streamlit
 
 EXPOSE 8501

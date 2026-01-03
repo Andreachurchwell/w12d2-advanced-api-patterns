@@ -5,7 +5,9 @@ import json
 import time
 
 # API_BASE_DEFAULT = "http://127.0.0.1:8000/v1"
-API_BASE_DEFAULT = os.getenv("API_BASE_URL") or os.getenv("API_BASE_URL") or "http://api:8000/v1"
+# API_BASE_DEFAULT = os.getenv("API_BASE_URL") or os.getenv("API_BASE_URL") or "http://api:8000/v1"
+API_BASE_DEFAULT = os.getenv("API_BASE_URL") or "http://localhost:8000/v1"
+
 st.set_page_config(
     page_title="Watchlist Dashboard",
     page_icon="🎬",
