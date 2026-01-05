@@ -216,3 +216,14 @@ Set these in the Render dashboard:
 - SQLite works locally, but it is not ideal for production deployments because the filesystem may not persist across deploys.
 - Redis features (rate limiting + caching) require a Redis instance available in production.
 - Streamlit is included for local Docker Compose demos. If needed, it can be deployed as a separate Render service and pointed at the API using `API_BASE_URL`.
+
+## AI Assistance Disclosure
+
+I used ChatGPT as a learning and debugging assistant throughout this assignment. I used it to:
+- Ask conceptual questions about API patterns (JWT, rate limiting, caching, versioning, etc.)
+- Help debug errors and interpret stack traces
+- Talk through architectural decisions and tradeoffs
+- Review and refine my reflection and documentation
+
+All code was written, run, and tested by me locally. ChatGPT was used as a support tool, not as an automated code generator or submission replacement.
+
